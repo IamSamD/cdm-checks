@@ -21,9 +21,12 @@ var ConfigValues []string = []string{
 }
 
 func RunCheck(config map[string]string) error {
-	// --------------------------------
-	// Write your check logic here
-	// --------------------------------
+	/*
+		--------------------------------
+		 Write your check logic here
+		--------------------------------
+	*/
+	log := cdm_framework.Logger
 
 	client := github.NewClient(nil).WithAuthToken(config["GITHUB_TOKEN"])
 
@@ -36,7 +39,7 @@ func RunCheck(config map[string]string) error {
 		return fmt.Errorf("failed to list github PRs due to error: %v", err)
 	}
 
-	fmt.Printf("Found %d open PRs for repo: %s\n", len(prs), config["GITHUB_REPO"])
+	log.Debug(fmt.Sprintf("Found %d open PRs for repo: %s", len(prs), config["GITHUB_REPO"]))
 
 	// Filter for dependabot PRs
 	var dependabotPRs []*github.PullRequest
@@ -47,11 +50,11 @@ func RunCheck(config map[string]string) error {
 		}
 	}
 
-	fmt.Printf("Found %d open PRs for repo: %s\n", len(dependabotPRs), config["GITHUB_REPO"])
+	log.Info(fmt.Sprintf("Found %d open dependabot PRs for repo: %s", len(dependabotPRs), config["GITHUB_REPO"]))
 
 	// Check assertion - fail check if more than 50 open Dependabot PRs
 	if len(dependabotPRs) > 50 {
-		fmt.Printf("There are more than 50 open Dependabot PRs for repo: %s", config["GITHUB_REPO"])
+		log.Info(fmt.Sprintf("There are more than 50 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
 		cdm_framework.FailCheck()
 	}
 

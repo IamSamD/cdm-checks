@@ -2,7 +2,6 @@ package main
 
 import (
 	"dependabotprs/check"
-	"fmt"
 	"log"
 
 	"github.com/iamsamd/cdm_framework"
@@ -30,8 +29,10 @@ func init() {
 }
 
 func main() {
+	log := cdm_framework.Logger
+
 	if err := check.RunCheck(config); err != nil {
-		fmt.Println(err)
+		log.Error(err.Error())
 		cdm_framework.FailCheck()
 	}
 }
