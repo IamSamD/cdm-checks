@@ -14,4 +14,4 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 )
 
-replace github.com/iamsamd/cdm_framework => ../../../../cdm_framework
+replace github.com/iamsamd/cdm_framework => ../../../../cdm_framework // for local development - to be removed on release v1 of cdm_framework
