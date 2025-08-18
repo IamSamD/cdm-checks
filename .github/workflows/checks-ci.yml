@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths-ignore:
       - '**/version'
+      - '**/README.md'
   pull_request:
     branches: [main]
     paths-ignore:
       - '**/version'
+      - '**/README.md'
 
 jobs:
   detect_builds:
