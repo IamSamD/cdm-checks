@@ -5,10 +5,6 @@ param (
     $isPr
 )
 
-Set-Location "../"
-
-Get-Location
-
 $ErrorActionPreference = "Stop"
 
 Write-Output "Running git diff...`n"
