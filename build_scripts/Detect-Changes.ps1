@@ -5,7 +5,7 @@ param (
     $isPr
 )
 
-Push-Location "../"
+Set-Location "../"
 
 $ErrorActionPreference = "Stop"
 
