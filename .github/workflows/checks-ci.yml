@@ -1,1 +1,131 @@
+name: checks_ci
 
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/version'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**/version'
+
+jobs:
+  detect_builds:
+    runs-on: ubuntu-latest
+    outputs:
+      checks: ${{ steps.detect_check_builds.outputs.checks }}
+      skipbuild: ${{ steps.detect_check_builds.outputs.skipbuild }}
+    steps:
+      - uses: actions/checkout@v4
+        name: 'Checkout code'
+        with:
+          fetch-depth: 2
+
+      - name: 'Detect Changes'
+        id: detect_check_builds
+        shell: pwsh
+        run: |
+          ./build_scripts/Detect-Changes.ps1
+
+  build:
+    needs: detect_builds
+    if: success() && needs.detect_builds.outputs.skipbuild != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      releases: ${{ steps.build.outputs.releases }}
+    strategy:
+      matrix:
+        check: ${{ fromJson(needs.detect_builds.outputs.checks) }}
+    steps:
+      - uses: actions/checkout@v4
+        name: 'Checkout code'
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.2'
+
+      - name: 'Bump Version'
+        id: bump_version
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "stop"
+
+          $versionString = Get-Content "${{ matrix.check }}/version"
+
+          Write-Output "Current Version: $versionString"
+
+          $versionSplit = $versionString -split "\." | ForEach-Object { [int]$_ }
+
+          $versionSplit[-1]++
+
+          $newVersion = $versionSplit -join "."
+
+          Write-Output "New Version: $newVersion"
+
+          $newVersion | Out-File "${{ matrix.check }}/version"
+
+          "version=v$newVersion" >> $env:GITHUB_OUTPUT
+
+          git pull origin main
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add "${{ matrix.check }}/version"
+          git commit -m "Bump version to $newVersion"
+          git push origin main
+
+      - name: 'build ${{ matrix.check }}'
+        id: build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "stop"
+          $version = "${{ steps.bump_version.outputs.version }}"
+          Set-Location ${{ matrix.check }}
+          Write-Output "Building check: ${{ matrix.check }}"
+          $binaryName = "${{ matrix.check}}" -replace "/", "_"
+          "binaryName=$binaryName" >> $env:GITHUB_OUTPUT
+          go build -o $binaryName
+          $releaseName = "{0}_{1}" -f $binaryName, $version
+          "releaseName=$releaseName" >> $env:GITHUB_OUTPUT
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "Build failed: ${{ matrix.check }}"
+            exit 1
+          }
+
+          Write-Output "Build succeeded: ${{ matrix.check }}"
+          exit 0
+
+      - name: 'Create Tag'
+        id: create_tag
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ steps.build.outputs.releaseName }}
+          git push origin ${{ steps.build.outputs.releaseName }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: 'Create Release'
+        id: release
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          gh release create ${{ steps.build.outputs.releaseName }} \
+          --title "${{ steps.build.outputs.releaseName }}" \
+          --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      - name: 'Upload Release Assets'
+        id: upload_assets
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          gh release upload ${{ steps.build.outputs.releaseName }} \
+          "${{ matrix.check }}/${{ steps.build.outputs.binaryName }}" \
+          --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
