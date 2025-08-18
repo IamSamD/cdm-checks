@@ -2,7 +2,7 @@
 param (
     [Parameter(Mandatory)]
     [string]
-    $isPr
+    $isPr = "false"
 )
 
 $ErrorActionPreference = "Stop"
