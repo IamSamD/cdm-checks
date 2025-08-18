@@ -35,7 +35,7 @@ jobs:
         id: detect_check_builds
         shell: pwsh
         run: |
-          ./build_scripts/Detect-Changes.ps1 -isPr ${{ steps.fetch_main.outputs.isPr }}
+          ./Detect-Changes.ps1 -isPr ${{ steps.fetch_main.outputs.isPr }}
 
   build:
     needs: detect_builds
