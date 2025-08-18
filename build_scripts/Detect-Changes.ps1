@@ -7,7 +7,7 @@ param (
 
 Set-Location "../"
 
-Get-Location | Write-Output "Current directory: $($_.Path)`n"
+Get-Location
 
 $ErrorActionPreference = "Stop"
 
