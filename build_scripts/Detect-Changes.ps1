@@ -7,6 +7,8 @@ param (
 
 Set-Location "../"
 
+Get-Location | Write-Output "Current directory: $($_.Path)`n"
+
 $ErrorActionPreference = "Stop"
 
 Write-Output "Running git diff...`n"
