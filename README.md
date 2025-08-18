@@ -120,3 +120,24 @@ You can now run the check locally with
 ```bash
 go run main.go
 ```
+
+## CI
+The CI pipeline for this repo is a Github Actions Workflow that will dynamically detect check with new commits and run a build only on the those checks. 
+
+### PR
+On raising a PR the CI workflow will trigger
+
+Checks with new commits will be detected against the main branch
+
+Only checks with new commits will be built to check that the build succeeds
+
+Once a successful build has been verified you will be cleared to merge to main
+
+### Merge to main
+On merge to main the workflow will:
+
+- Build the new/updated check
+- Bump the version of the check
+- Create a new tag and a new release for the check on the new version
+
+This will allow for specifying the version of a check that should be used in the clients CDM pipeline. 
