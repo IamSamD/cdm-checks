@@ -1,9 +1,19 @@
-Push-Location $PSScriptRoot
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [string]
+    $isPr
+)
 
 $ErrorActionPreference = "Stop"
 
 Write-Output "Running git diff...`n"
-$files = git diff --name-only HEAD~1 HEAD
+
+if ($isPr -eq "true") {
+    $files = git diff --name-only origin/main...HEAD
+} else {
+    $files = git diff --name-only HEAD~1 HEAD
+}
 
 Write-Output "Changed files: $files`n"
 

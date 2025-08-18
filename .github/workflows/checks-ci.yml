@@ -22,11 +22,20 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: 'Fetch main'
+        id: fetch_main
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin main
+          echo "isPr=true" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+
       - name: 'Detect Changes'
         id: detect_check_builds
         shell: pwsh
         run: |
-          ./build_scripts/Detect-Changes.ps1
+          ./Detect-Changes.ps1 -isPr ${{ steps.fetch_main.outputs.isPr }}
 
   build:
     needs: detect_builds
