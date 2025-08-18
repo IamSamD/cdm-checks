@@ -27,7 +27,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch origin main
-          "isPr=true" >> $env:GITHUB_OUTPUT
+          echo "isPr=true" >> $env:GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
