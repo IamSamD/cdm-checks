@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 Write-Output "Running git diff...`n"
 
 if ($isPr -eq "true") {
-    $files = git diff --name-only origin/main HEAD HEAD
+    $files = git diff --name-only main...HEAD
 } else {
     $files = git diff --name-only HEAD~1 HEAD
 }
