@@ -3,13 +3,12 @@ package check
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/google/go-github/v74/github"
 	"github.com/iamsamd/cdm_framework"
 )
 
-var log *slog.Logger = cdm_framework.Logger
+var log *cdm_framework.Logger = cdm_framework.NewLogger()
 
 /*
 ConfigValues is a slice of strings, each string being the name of
@@ -25,6 +24,7 @@ Example:
 		"ENV_VAR_TWO",
 		"ENV_VAR_THREE",
 	}
+
 */
 
 var ConfigValues []string = []string{
@@ -67,11 +67,11 @@ func Check(config cdm_framework.Config) error {
 		}
 	}
 
-	log.Info(fmt.Sprintf("Found %d open dependabot PRs for repo: %s", len(dependabotPRs), config["GITHUB_REPO"]))
+	log.Debug(fmt.Sprintf("Found %d open dependabot PRs for repo: %s", len(dependabotPRs), config["GITHUB_REPO"]))
 
 	// Check assertion - fail check if more than 5 open Dependabot PRs
 	if len(dependabotPRs) >= 5 {
-		log.Info(fmt.Sprintf("There are more than 5 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
+		cdm_framework.CheckFailedReport(fmt.Sprintf("There are more than 5 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
 		cdm_framework.FailCheck()
 	}
 

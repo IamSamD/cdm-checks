@@ -2,14 +2,13 @@ package main
 
 import (
 	"dependabotprs/check"
-	"log/slog"
 
 	"github.com/iamsamd/cdm_framework"
 )
 
 var config cdm_framework.Config
 
-var log *slog.Logger = cdm_framework.Logger
+var log *cdm_framework.Logger = cdm_framework.NewLogger()
 
 func init() {
 	configValues, err := cdm_framework.InitEnvironment(check.ConfigValues)
