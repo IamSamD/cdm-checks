@@ -69,9 +69,9 @@ func Check(config cdm_framework.Config) error {
 
 	log.Info(fmt.Sprintf("Found %d open dependabot PRs for repo: %s", len(dependabotPRs), config["GITHUB_REPO"]))
 
-	// Check assertion - fail check if more than 50 open Dependabot PRs
-	if len(dependabotPRs) > 50 {
-		log.Info(fmt.Sprintf("There are more than 50 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
+	// Check assertion - fail check if more than 5 open Dependabot PRs
+	if len(dependabotPRs) >= 5 {
+		log.Info(fmt.Sprintf("There are more than 5 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
 		cdm_framework.FailCheck()
 	}
 
