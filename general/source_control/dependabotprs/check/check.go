@@ -3,6 +3,7 @@ package check
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/google/go-github/v74/github"
 	"github.com/iamsamd/cdm_framework"
@@ -31,6 +32,7 @@ var ConfigValues []string = []string{
 	"GITHUB_TOKEN",
 	"GITHUB_OWNER",
 	"GITHUB_REPO",
+	"NO_OF_PRS_THRESHOLD",
 }
 
 /*
@@ -69,9 +71,14 @@ func Check(config cdm_framework.Config) error {
 
 	log.Debug(fmt.Sprintf("Found %d open dependabot PRs for repo: %s", len(dependabotPRs), config["GITHUB_REPO"]))
 
+	prThreshold, err := strconv.Atoi(config["NO_OF_PRS_THRESHOLD"])
+	if err != nil {
+		return fmt.Errorf("failed to convert NO_OF_PRS_THRESHOLD to int due to error: %v", err)
+	}
+
 	// Check assertion - fail check if more than 5 open Dependabot PRs
-	if len(dependabotPRs) >= 5 {
-		cdm_framework.CheckFailedReport(fmt.Sprintf("There are more than 5 open Dependabot PRs for repo: %s", config["GITHUB_REPO"]))
+	if len(dependabotPRs) >= prThreshold {
+		cdm_framework.CheckFailedReport(fmt.Sprintf("There are more than %d open Dependabot PRs for repo: %s", prThreshold, config["GITHUB_REPO"]))
 		cdm_framework.FailCheck()
 	}
 
